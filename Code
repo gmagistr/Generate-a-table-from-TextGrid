@@ -1,0 +1,36 @@
+library(rPraat) #package for Praat
+library(writexl) #package for saving the final table
+
+tab <- data.frame(file = listFiles) #I create the final table
+tab$low <- NA #start creating the columns
+tab$high <- NA
+tab$onset <- NA
+tab$offset <- NA 
+tab$nucleus <-NA
+inputFolder <- "experiment1/data" #Insert here folder's name, pay attention to the orientation of slash, it must be as in the example
+listFiles <- list.files(path = inputFolder, pattern = "\\.TextGrid$" , ignore.case = TRUE)
+
+
+for (I in seq_along(listFiles)) {  #Generate an index of iterations as the files in the folder
+    file <- listFiles[I] #iterate through the files n-times
+    fileName <- substr(file, 1, nchar(file) - nchar(".TextGrid"))
+    fileTextGrid <- paste0(inputFolder, "/", fileName, ".TextGrid")
+    tg <- tg.read(fileTextGrid) #read
+    Lpeak <-c("L") #this is how you search the label
+     Lpeak <-tg$points$label %in% Lpeak #please pick the points that match the description
+     Hpeak <-c("H") #same
+     Hpeak <-tg$points$label %in% Hpeak
+     V <-c("v")
+     V <- tg$points$label %in% V
+     Onset <- c("on")
+     Onset <-tg$points$label %in% Onset 
+     Offset <-c("off")
+     Offset <-tg$points$label %in% Offset 
+     tab$low[I] <-tg$points$t[Lpeak]
+     tab$high[I]<-tg$points$t[Hpeak]
+     tab$nucleus[I]<-tg$points$t[V]
+     tab$onset[I] <-tg$points$t[Onset]
+     tab$offset[I] <-tg$points$t[Offset]
+     print (tab)
+     }
+write_xlsx(tab, "table.xlsx") #write the tab
